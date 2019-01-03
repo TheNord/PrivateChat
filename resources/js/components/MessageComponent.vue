@@ -23,9 +23,13 @@
             </div>
         </div>
         <div class="card-body" v-chat-scroll>
-            <p class="card-text" :class="{'text-right' : chat.type === 0}" v-for="chat in chats" :key="chat.id">
+            <p class="card-text"
+               v-for="chat in chats"
+               :key="chat.id"
+               :class="{ 'text-right' : chat.type === 0, 'not-read' : readStatus(chat) }">
                 {{ chat.message }}
             </p>
+
         </div>
         <form class="card-footer" @submit.prevent="send">
             <div class="form-group">
@@ -50,10 +54,15 @@
             send() {
                 if (this.message) {
                     this.pushToChat(this.message);
-                    axios.post(`/send/${this.friend.session.id}`, {
-                        message: this.message,
-                        to_user: this.friend.id
-                    });
+                    axios
+                        .post(`/send/${this.friend.session.id}`, {
+                            message: this.message,
+                            to_user: this.friend.id
+                        })
+                        .then(res => {
+                            // добавляем id из ответа к сообщению
+                            this.chats[this.chats.length - 1].id = res.data;
+                        });
                     this.message = '';
                 }
             },
@@ -61,6 +70,7 @@
                 this.chats.push({
                     message: message,
                     type: 0,
+                    read_at: null,
                     send_at: '1 секунду назад'
                 });
             },
@@ -80,6 +90,11 @@
             },
             read() {
                 axios.post(`/chats/${this.friend.session.id}/read`);
+            },
+            readStatus(chat) {
+                if (chat.read_at === null && chat.type === 0) {
+                    return true;
+                }
             }
         },
         created() {
@@ -88,14 +103,27 @@
 
             // слушаем приватный канал сессии на получение событий
             Echo.private(`Chat.${this.friend.session.id}`)
+            // событие - получение нового сообщения
                 .listen('PrivateChatEvent', (e) => {
                     // помечаем сообщение прочитанным
-                    this.read();
+                    this.friend.session.open ? this.read() : '';
+                    // добавляем сообщение в список сообщений
                     this.chats.push({
                         message: e.content,
                         type: 1,
                         send_at: '1 секунду назад'
                     });
+                })
+                // событие - прочтение сообщения
+                .listen('MsgReadEvent', (e) => {
+                    // проходим циклом по всем сообщениям текущей сессии
+                    this.chats.forEach(chat => {
+                        // находим нужное сообщение по ид
+                        if (chat.id === e.chat.id) {
+                            // помечаем прочитанным
+                            chat.read_at = e.chat.read_at
+                        }
+                    })
                 });
         }
     };
@@ -111,4 +139,7 @@
         overflow-x: scroll;
     }
 
+    .not-read {
+        background-color: #dedede;
+    }
 </style>

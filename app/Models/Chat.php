@@ -8,6 +8,10 @@ class Chat extends Model
 {
     protected $guarded = [];
 
+    protected $casts = [
+        'read_at' => 'datetime'
+    ];
+
     // У каждого чата (действия с сообщением) может быть лишь одно сообщение
     // в таблице messages, получаем их через обратную связь по полю message_id в таблице chats
     public function message()

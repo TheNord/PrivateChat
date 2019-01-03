@@ -1951,6 +1951,10 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["friend"],
   data: function data() {
@@ -1962,11 +1966,16 @@ __webpack_require__.r(__webpack_exports__);
   },
   methods: {
     send: function send() {
+      var _this = this;
+
       if (this.message) {
         this.pushToChat(this.message);
         axios.post("/send/".concat(this.friend.session.id), {
           message: this.message,
           to_user: this.friend.id
+        }).then(function (res) {
+          // добавляем id из ответа к сообщению
+          _this.chats[_this.chats.length - 1].id = res.data;
         });
         this.message = '';
       }
@@ -1975,6 +1984,7 @@ __webpack_require__.r(__webpack_exports__);
       this.chats.push({
         message: message,
         type: 0,
+        read_at: null,
         send_at: '1 секунду назад'
       });
     },
@@ -1988,30 +1998,46 @@ __webpack_require__.r(__webpack_exports__);
       this.session_block = !this.session_block;
     },
     getAllMessages: function getAllMessages() {
-      var _this = this;
+      var _this2 = this;
 
       axios.post("/chats/".concat(this.friend.session.id)).then(function (response) {
-        return _this.chats = response.data.data;
+        return _this2.chats = response.data.data;
       });
     },
     read: function read() {
       axios.post("/chats/".concat(this.friend.session.id, "/read"));
+    },
+    readStatus: function readStatus(chat) {
+      if (chat.read_at === null && chat.type === 0) {
+        return true;
+      }
     }
   },
   created: function created() {
-    var _this2 = this;
+    var _this3 = this;
 
     this.getAllMessages();
     this.read(); // слушаем приватный канал сессии на получение событий
 
-    Echo.private("Chat.".concat(this.friend.session.id)).listen('PrivateChatEvent', function (e) {
+    Echo.private("Chat.".concat(this.friend.session.id)) // событие - получение нового сообщения
+    .listen('PrivateChatEvent', function (e) {
       // помечаем сообщение прочитанным
-      _this2.read();
+      _this3.friend.session.open ? _this3.read() : ''; // добавляем сообщение в список сообщений
 
-      _this2.chats.push({
+      _this3.chats.push({
         message: e.content,
         type: 1,
         send_at: '1 секунду назад'
+      });
+    }) // событие - прочтение сообщения
+    .listen('MsgReadEvent', function (e) {
+      // проходим циклом по всем сообщениям текущей сессии
+      _this3.chats.forEach(function (chat) {
+        // находим нужное сообщение по ид
+        if (chat.id === e.chat.id) {
+          // помечаем прочитанным
+          chat.read_at = e.chat.read_at;
+        }
       });
     });
   }
@@ -6290,7 +6316,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n.chat-box {\n    height: 400px;\n}\n.card-body {\n    overflow-x: scroll;\n}\n\n", ""]);
+exports.push([module.i, "\n.chat-box {\n    height: 400px;\n}\n.card-body {\n    overflow-x: scroll;\n}\n.not-read {\n    background-color: #dedede;\n}\n", ""]);
 
 // exports
 
@@ -47866,7 +47892,10 @@ var render = function() {
           {
             key: chat.id,
             staticClass: "card-text",
-            class: { "text-right": chat.type === 0 }
+            class: {
+              "text-right": chat.type === 0,
+              "not-read": _vm.readStatus(chat)
+            }
           },
           [_vm._v("\n            " + _vm._s(chat.message) + "\n        ")]
         )
