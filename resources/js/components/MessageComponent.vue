@@ -80,7 +80,9 @@
                 this.$emit('close');
             },
             clear() {
-                this.chats = []
+                axios
+                    .post(`/chats/${this.friend.session.id}/clear`)
+                    .then(res => (this.chats = []));
             },
             block() {
                 this.session_block = !this.session_block

@@ -1994,16 +1994,20 @@ __webpack_require__.r(__webpack_exports__);
       this.$emit('close');
     },
     clear: function clear() {
-      this.chats = [];
+      var _this2 = this;
+
+      axios.post("/chats/".concat(this.friend.session.id, "/clear")).then(function (res) {
+        return _this2.chats = [];
+      });
     },
     block: function block() {
       this.session_block = !this.session_block;
     },
     getAllMessages: function getAllMessages() {
-      var _this2 = this;
+      var _this3 = this;
 
       axios.post("/chats/".concat(this.friend.session.id)).then(function (response) {
-        return _this2.chats = response.data.data;
+        return _this3.chats = response.data.data;
       });
     },
     read: function read() {
@@ -2016,7 +2020,7 @@ __webpack_require__.r(__webpack_exports__);
     }
   },
   created: function created() {
-    var _this3 = this;
+    var _this4 = this;
 
     this.getAllMessages();
     this.read(); // слушаем приватный канал сессии на получение событий
@@ -2024,9 +2028,9 @@ __webpack_require__.r(__webpack_exports__);
     Echo.private("Chat.".concat(this.friend.session.id)) // событие - получение нового сообщения
     .listen('PrivateChatEvent', function (e) {
       // помечаем сообщение прочитанным
-      _this3.friend.session.open ? _this3.read() : ''; // добавляем сообщение в список сообщений
+      _this4.friend.session.open ? _this4.read() : ''; // добавляем сообщение в список сообщений
 
-      _this3.chats.push({
+      _this4.chats.push({
         message: e.content,
         type: 1,
         send_at: '1 second ago'
@@ -2034,7 +2038,7 @@ __webpack_require__.r(__webpack_exports__);
     }) // событие - прочтение сообщения
     .listen('MsgReadEvent', function (e) {
       // проходим циклом по всем сообщениям текущей сессии
-      _this3.chats.forEach(function (chat) {
+      _this4.chats.forEach(function (chat) {
         // находим нужное сообщение по ид
         if (chat.id === e.chat.id) {
           // помечаем прочитанным
