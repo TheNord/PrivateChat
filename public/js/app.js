@@ -1822,9 +1822,7 @@ __webpack_require__.r(__webpack_exports__);
       if (friend.session) {
         // перед открытием новой сессии закрываем все ранее открытые
         this.friends.forEach(function (friend) {
-          if (friend.session) {
-            friend.session.open = false;
-          }
+          return friend.session ? friend.session.open = false : '';
         }); // открываем диалоговое окно
 
         friend.session.open = true;
@@ -1836,9 +1834,7 @@ __webpack_require__.r(__webpack_exports__);
     createSession: function createSession(friend) {
       // перед созданием новой сессии закрываем все ранее открытые
       this.friends.forEach(function (friend) {
-        if (friend.session) {
-          friend.session.open = false;
-        }
+        return friend.session ? friend.session.open = false : '';
       }); // создаем новую сессию
 
       axios.post('/session/create', {
@@ -1962,7 +1958,8 @@ __webpack_require__.r(__webpack_exports__);
     },
     pushToChat: function pushToChat(message) {
       this.chats.push({
-        message: message
+        message: message,
+        type: 0
       });
     },
     close: function close() {
@@ -1978,7 +1975,7 @@ __webpack_require__.r(__webpack_exports__);
       var _this = this;
 
       axios.post("/chats/".concat(this.friend.session.id)).then(function (response) {
-        return _this.chats = response.data;
+        return _this.chats = response.data.data;
       });
     }
   },
@@ -47825,9 +47822,15 @@ var render = function() {
         staticClass: "card-body"
       },
       _vm._l(_vm.chats, function(chat) {
-        return _c("p", { key: chat.message, staticClass: "card-text" }, [
-          _vm._v("\n            " + _vm._s(chat.message) + "\n        ")
-        ])
+        return _c(
+          "p",
+          {
+            key: chat.message,
+            staticClass: "card-text",
+            class: { "text-right": chat.type === 0 }
+          },
+          [_vm._v("\n            " + _vm._s(chat.message) + "\n        ")]
+        )
       }),
       0
     ),

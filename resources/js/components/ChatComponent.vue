@@ -55,11 +55,9 @@
             openChat(friend) {
                 if (friend.session) {
                     // перед открытием новой сессии закрываем все ранее открытые
-                    this.friends.forEach(friend => {
-                        if (friend.session) {
-                            friend.session.open = false;
-                        }
-                    });
+                    this.friends.forEach(
+                        friend => friend.session ? friend.session.open = false : ''
+                    );
                     // открываем диалоговое окно
                     friend.session.open = true;
                 }  else {
@@ -69,11 +67,9 @@
             },
             createSession(friend) {
                 // перед созданием новой сессии закрываем все ранее открытые
-                this.friends.forEach(friend => {
-                    if (friend.session) {
-                        friend.session.open = false;
-                    }
-                });
+                this.friends.forEach(
+                    friend => friend.session ? friend.session.open = false : ''
+                );
                 // создаем новую сессию
                 axios.post('/session/create', {friend_id: friend.id}).then(response => {
                     friend.session = response.data.data;

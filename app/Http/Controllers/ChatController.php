@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\ChatResource;
 use App\Models\Session;
 use Illuminate\Http\Request;
 
@@ -25,6 +26,8 @@ class ChatController extends Controller
 
     public function chats(Session $session)
     {
-
+        // через связь chats в модели Session получаем все сообщения пользователя
+        $chats = ChatResource::collection($session->chats->where('user_id', auth()->id()));
+        return $chats;
     }
 }
