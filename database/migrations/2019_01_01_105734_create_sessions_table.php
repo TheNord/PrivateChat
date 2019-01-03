@@ -13,7 +13,7 @@ class CreateSessionsTable extends Migration
      */
     public function up()
     {
-        Schema::create('session', function (Blueprint $table) {
+        Schema::create('sessions', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedInteger('user1_id');
             $table->unsignedInteger('user2_id');

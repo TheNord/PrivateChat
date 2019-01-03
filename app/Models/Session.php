@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Session extends Model
 {
+    protected $fillable = ['user1_id', 'user2_id'];
+
     // Через таблицу chats, по полю messages_id, мы можем обратиться к таблице messages
     // и получить нужные сообщения для отображения пользователю
     public function chats()
