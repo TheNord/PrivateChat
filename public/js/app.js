@@ -1959,7 +1959,8 @@ __webpack_require__.r(__webpack_exports__);
     pushToChat: function pushToChat(message) {
       this.chats.push({
         message: message,
-        type: 0
+        type: 0,
+        send_at: '1 секунду назад'
       });
     },
     close: function close() {
@@ -1980,7 +1981,16 @@ __webpack_require__.r(__webpack_exports__);
     }
   },
   created: function created() {
+    var _this2 = this;
+
     this.getAllMessages();
+    Echo.private("Chat.".concat(this.friend.session.id)).listen('PrivateChatEvent', function (e) {
+      _this2.chats.push({
+        message: e.content,
+        type: 1,
+        send_at: '1 секунду назад'
+      });
+    });
   }
 });
 
@@ -47825,7 +47835,7 @@ var render = function() {
         return _c(
           "p",
           {
-            key: chat.message,
+            key: chat.id,
             staticClass: "card-text",
             class: { "text-right": chat.type === 0 }
           },
