@@ -16,10 +16,12 @@ class SessionsController extends Controller
             'user2_id' => $request->friend_id
         ]);
 
-        broadcast(new SessionEvent($session, auth()->id()));
+        $modifiedSession = new SessionResource($session);
+
+        broadcast(new SessionEvent($modifiedSession, auth()->id()));
 
         // возвращаем ответ через ресурс сессии, чтобы даже при отсутствии сессии с пользователем
         // появились нужные поля для дальнейшего заполнения в vue
-        return new SessionResource($session);
+        return $modifiedSession;
     }
 }

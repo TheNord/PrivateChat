@@ -1822,7 +1822,9 @@ __webpack_require__.r(__webpack_exports__);
       if (friend.session) {
         // перед открытием новой сессии закрываем все ранее открытые
         this.friends.forEach(function (friend) {
-          friend.session.open = false;
+          if (friend.session) {
+            friend.session.open = false;
+          }
         }); // открываем диалоговое окно
 
         friend.session.open = true;
@@ -1852,6 +1854,14 @@ __webpack_require__.r(__webpack_exports__);
 
     // получаем список пользователей
     this.getFriends();
+    Echo.channel('Chat').listen('SessionEvent', function (e) {
+      // находим среди всех пользователей, пользователя который создал сессию
+      var friend = _this2.friends.find(function (friend) {
+        return friend.id === e.session_by;
+      });
+
+      friend.session = e.session;
+    });
     Echo.join('Chat') // получаем список онлайн пользователей
     .here(function (users) {
       _this2.friends.forEach(function (friend) {

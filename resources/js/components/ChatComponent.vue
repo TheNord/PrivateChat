@@ -56,7 +56,9 @@
                 if (friend.session) {
                     // перед открытием новой сессии закрываем все ранее открытые
                     this.friends.forEach(friend => {
+                        if (friend.session) {
                             friend.session.open = false;
+                        }
                     });
                     // открываем диалоговое окно
                     friend.session.open = true;
@@ -82,6 +84,14 @@
         created() {
             // получаем список пользователей
             this.getFriends();
+
+            Echo.channel('Chat')
+                .listen('SessionEvent', e => {
+                    // находим среди всех пользователей, пользователя который создал сессию
+                   let friend = this.friends.find(friend => friend.id === e.session_by);
+                   // меняем информацию о созданной сессии
+                   friend.session = e.session;
+                });
 
             Echo.join('Chat')
                 // получаем список онлайн пользователей
