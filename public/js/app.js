@@ -1858,7 +1858,8 @@ __webpack_require__.r(__webpack_exports__);
       // находим среди всех пользователей, пользователя который создал сессию
       var friend = _this2.friends.find(function (friend) {
         return friend.id === e.session_by;
-      });
+      }); // меняем информацию о созданной сессии
+
 
       friend.session = e.session;
     });
@@ -1940,16 +1941,29 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 /* harmony default export */ __webpack_exports__["default"] = ({
-  props: ['friend'],
+  props: ["friend"],
   data: function data() {
     return {
       chats: [],
+      message: '',
       session_block: false
     };
   },
   methods: {
     send: function send() {
-      console.log('test');
+      if (this.message) {
+        this.pushToChat(this.message);
+        axios.post("/send/".concat(this.friend.session.id), {
+          message: this.message,
+          to_user: this.friend.id
+        });
+        this.message = '';
+      }
+    },
+    pushToChat: function pushToChat(message) {
+      this.chats.push({
+        message: message
+      });
     },
     close: function close() {
       this.$emit('close');
@@ -1959,40 +1973,17 @@ __webpack_require__.r(__webpack_exports__);
     },
     block: function block() {
       this.session_block = !this.session_block;
+    },
+    getAllMessages: function getAllMessages() {
+      var _this = this;
+
+      axios.post("/chats/".concat(this.friend.session.id)).then(function (response) {
+        return _this.chats = response.data;
+      });
     }
   },
   created: function created() {
-    this.chats.push({
-      message: 'Heyy'
-    }, {
-      message: 'test 2'
-    }, {
-      message: 'test 3'
-    }, {
-      message: 'test 4'
-    }, {
-      message: 'test 5'
-    }, {
-      message: 'test 6'
-    }, {
-      message: 'test 7'
-    }, {
-      message: 'test 8'
-    }, {
-      message: 'test 9'
-    }, {
-      message: 'test 10'
-    }, {
-      message: 'test 11'
-    }, {
-      message: 'test 12'
-    }, {
-      message: 'test 13'
-    }, {
-      message: 'test 14'
-    }, {
-      message: 'test 15'
-    });
+    this.getAllMessages();
   }
 });
 
@@ -47855,11 +47846,28 @@ var render = function() {
       [
         _c("div", { staticClass: "form-group" }, [
           _c("input", {
+            directives: [
+              {
+                name: "model",
+                rawName: "v-model",
+                value: _vm.message,
+                expression: "message"
+              }
+            ],
             staticClass: "form-control",
             attrs: {
               type: "text",
               placeholder: "Write your message here",
               disabled: _vm.session_block
+            },
+            domProps: { value: _vm.message },
+            on: {
+              input: function($event) {
+                if ($event.target.composing) {
+                  return
+                }
+                _vm.message = $event.target.value
+              }
             }
           })
         ])

@@ -39,7 +39,7 @@
         data() {
             return {
                 friends: []
-            }
+            };
         },
         methods: {
             // закрытие диалога с переданным пользователем
@@ -124,5 +124,5 @@
         components: {
             MessageComponent
         }
-    }
+    };
 </script>

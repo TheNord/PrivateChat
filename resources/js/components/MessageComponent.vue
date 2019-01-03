@@ -30,7 +30,7 @@
         <form class="card-footer" @submit.prevent="send">
             <div class="form-group">
                 <input type="text" class="form-control" placeholder="Write your message here"
-                :disabled="session_block">
+                       :disabled="session_block" v-model="message">
             </div>
         </form>
     </div>
@@ -38,16 +38,27 @@
 
 <script>
     export default {
-        props:['friend'],
+        props: ["friend"],
         data() {
             return {
-                chats:[],
+                chats: [],
+                message: '',
                 session_block: false
-            }
+            };
         },
         methods: {
             send() {
-                console.log('test');
+                if (this.message) {
+                    this.pushToChat(this.message);
+                    axios.post(`/send/${this.friend.session.id}`, {
+                        message: this.message,
+                        to_user: this.friend.id
+                    });
+                    this.message = '';
+                }
+            },
+            pushToChat(message) {
+                this.chats.push({message: message});
             },
             close() {
                 this.$emit('close');
@@ -57,28 +68,18 @@
             },
             block() {
                 this.session_block = !this.session_block
+            },
+            getAllMessages() {
+                axios
+                    .post(`/chats/${this.friend.session.id}`)
+                    .then(response => this.chats = response.data);
+
             }
         },
         created() {
-            this.chats.push(
-                {message: 'Heyy'},
-                {message: 'test 2'},
-                {message: 'test 3'},
-                {message: 'test 4'},
-                {message: 'test 5'},
-                {message: 'test 6'},
-                {message: 'test 7'},
-                {message: 'test 8'},
-                {message: 'test 9'},
-                {message: 'test 10'},
-                {message: 'test 11'},
-                {message: 'test 12'},
-                {message: 'test 13'},
-                {message: 'test 14'},
-                {message: 'test 15'}
-                )
+            this.getAllMessages();
         }
-    }
+    };
 </script>
 
 <style>
