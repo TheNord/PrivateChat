@@ -20,6 +20,7 @@ class Message extends Model
     {
         return $this->chats()->create([
             'session_id' => $session_id,
+            // назначаем тип 0, для отправителя сообщения
             'type' => 0,
             'user_id' => auth()->id()
         ]);
@@ -29,6 +30,7 @@ class Message extends Model
     {
         return $this->chats()->create([
             'session_id' => $session_id,
+            // назначаем тип 1, для получятеля сообщения
             'type' => 1,
             'user_id' => $user_id
         ]);

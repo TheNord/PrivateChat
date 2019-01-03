@@ -1798,6 +1798,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
@@ -1815,7 +1816,12 @@ __webpack_require__.r(__webpack_exports__);
       var _this = this;
 
       axios.post('/getFriends').then(function (response) {
-        _this.friends = response.data.data;
+        _this.friends = response.data.data; // проходим циклом по всем пользователям и подписываем на событие
+        // получения нового сообщения и при получении увеличиваем количество непрочитанных
+
+        _this.friends.forEach(function (friend) {
+          friend.session ? _this.listenForEverySession(friend) : '';
+        });
       });
     },
     openChat: function openChat(friend) {
@@ -1825,7 +1831,9 @@ __webpack_require__.r(__webpack_exports__);
           return friend.session ? friend.session.open = false : '';
         }); // открываем диалоговое окно
 
-        friend.session.open = true;
+        friend.session.open = true; // обнуляем счетчик непрочитанных сообщений
+
+        friend.session.unreadCount = 0;
       } else {
         // создаем новую сессию между пользователями
         this.createSession(friend);
@@ -1843,6 +1851,11 @@ __webpack_require__.r(__webpack_exports__);
         friend.session = response.data.data;
         friend.session.open = true;
       });
+    },
+    listenForEverySession: function listenForEverySession(friend) {
+      Echo.private("Chat.".concat(friend.session.id)).listen('PrivateChatEvent', function (e) {
+        return friend.session.open ? "" : friend.session.unreadCount++;
+      });
     }
   },
   created: function created() {
@@ -1857,7 +1870,9 @@ __webpack_require__.r(__webpack_exports__);
       }); // меняем информацию о созданной сессии
 
 
-      friend.session = e.session;
+      friend.session = e.session; // подписываем сессию на счетчик непрочитанных сообщений
+
+      _this2.listeForEverySession(friend);
     });
     Echo.join('Chat') // получаем список онлайн пользователей
     .here(function (users) {
@@ -1978,13 +1993,21 @@ __webpack_require__.r(__webpack_exports__);
       axios.post("/chats/".concat(this.friend.session.id)).then(function (response) {
         return _this.chats = response.data.data;
       });
+    },
+    read: function read() {
+      axios.post("/chats/".concat(this.friend.session.id, "/read"));
     }
   },
   created: function created() {
     var _this2 = this;
 
     this.getAllMessages();
+    this.read(); // слушаем приватный канал сессии на получение событий
+
     Echo.private("Chat.".concat(this.friend.session.id)).listen('PrivateChatEvent', function (e) {
+      // помечаем сообщение прочитанным
+      _this2.read();
+
       _this2.chats.push({
         message: e.content,
         type: 1,
@@ -47690,12 +47713,18 @@ var render = function() {
                         _vm._s(friend.name) +
                         "\n                            "
                     ),
-                    friend.online
-                      ? _c("i", {
-                          staticClass: "fas fa-circle float-right text-success"
-                        })
+                    friend.session && friend.session.unreadCount > 0
+                      ? _c("span", { staticClass: "text-danger" }, [
+                          _vm._v(_vm._s(friend.session.unreadCount))
+                        ])
                       : _vm._e()
-                  ])
+                  ]),
+                  _vm._v(" "),
+                  friend.online
+                    ? _c("i", {
+                        staticClass: "fas fa-circle float-right text-success"
+                      })
+                    : _vm._e()
                 ]
               )
             }),
@@ -59267,14 +59296,15 @@ window.Echo = new laravel_echo__WEBPACK_IMPORTED_MODULE_0__["default"]({
 /*!***************************************************!*\
   !*** ./resources/js/components/ChatComponent.vue ***!
   \***************************************************/
-/*! exports provided: default */
+/*! no static exports found */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _ChatComponent_vue_vue_type_template_id_80d584ac___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./ChatComponent.vue?vue&type=template&id=80d584ac& */ "./resources/js/components/ChatComponent.vue?vue&type=template&id=80d584ac&");
 /* harmony import */ var _ChatComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./ChatComponent.vue?vue&type=script&lang=js& */ "./resources/js/components/ChatComponent.vue?vue&type=script&lang=js&");
-/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _ChatComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _ChatComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
 
 
 
@@ -59304,7 +59334,7 @@ component.options.__file = "resources/js/components/ChatComponent.vue"
 /*!****************************************************************************!*\
   !*** ./resources/js/components/ChatComponent.vue?vue&type=script&lang=js& ***!
   \****************************************************************************/
-/*! exports provided: default */
+/*! no static exports found */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";

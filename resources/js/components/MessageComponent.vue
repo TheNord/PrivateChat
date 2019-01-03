@@ -77,14 +77,20 @@
                 axios
                     .post(`/chats/${this.friend.session.id}`)
                     .then(response => this.chats = response.data.data);
-
+            },
+            read() {
+                axios.post(`/chats/${this.friend.session.id}/read`);
             }
         },
         created() {
             this.getAllMessages();
+            this.read();
 
+            // слушаем приватный канал сессии на получение событий
             Echo.private(`Chat.${this.friend.session.id}`)
                 .listen('PrivateChatEvent', (e) => {
+                    // помечаем сообщение прочитанным
+                    this.read();
                     this.chats.push({
                         message: e.content,
                         type: 1,

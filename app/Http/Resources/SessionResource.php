@@ -18,7 +18,15 @@ class SessionResource extends JsonResource
         return [
             'id' => $this->id,
             'open' => false,
-            'users' => [$this->user1_id, $this->user2_id]
+            'users' => [$this->user1_id, $this->user2_id],
+            // получаем количество непрочитанных сообщений для текущей сессии
+            // через связь chats в модели Session получаем непрочитанные сообщения,
+            // с типом 0 (так мы получим только те сообщения которые отправили нам, а не мы сами)
+            // где пользователь не равен текущему
+            'unreadCount' => $this->chats->where('read_at', null)
+                ->where('type', 0)
+                ->where('user_id', '!=', auth()->id())
+                ->count()
         ];
     }
 }

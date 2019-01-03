@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Events\PrivateChatEvent;
 use App\Http\Resources\ChatResource;
 use App\Models\Session;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class ChatController extends Controller
@@ -33,5 +34,21 @@ class ChatController extends Controller
         // через связь chats в модели Session получаем все сообщения пользователя
         $chats = ChatResource::collection($session->chats->where('user_id', auth()->id()));
         return $chats;
+    }
+
+    public function read(Session $session)
+    {
+        // получаем все непрочитанные сообщения предназначенные для пользователя
+        $messages = $session->chats->where('read_at', null)
+            ->where('type', 0)
+            ->where('user_id', '!=', auth()->id());
+
+        foreach ($messages as $message) {
+            $message->update([
+                'read_at' => Carbon::now()
+            ]);
+        }
+
+        return $messages;
     }
 }
