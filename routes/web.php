@@ -16,3 +16,6 @@ Route::post('/send/{session}', 'ChatController@send');
 Route::post('/chats/{session}', 'ChatController@chats');
 Route::post('/chats/{session}/read', 'ChatController@read');
 Route::post('/chats/{session}/clear', 'ChatController@clear');
+
+Route::post('/chats/{session}/block', 'ChatController@block');
+Route::post('/chats/{session}/unblock', 'ChatController@unblock');

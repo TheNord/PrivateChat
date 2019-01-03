@@ -19,6 +19,8 @@ class SessionResource extends JsonResource
             'id' => $this->id,
             'open' => false,
             'users' => [$this->user1_id, $this->user2_id],
+            'block' => !!$this->block,
+            'blocked_by' => $this->blocked_by,
             // получаем количество непрочитанных сообщений для текущей сессии
             // через связь chats в модели Session получаем непрочитанные сообщения,
             // с типом 0 (так мы получим только те сообщения которые отправили нам, а не мы сами)

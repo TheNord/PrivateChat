@@ -1,9 +1,9 @@
 <template>
     <div class="card card-default chat-box">
         <div class="card-header">
-            <b :class="{'text-danger':session_block}">
+            <b :class="{'text-danger':session.block}">
                 {{ friend.name }}
-                <span v-if="session_block">(Blocked)</span>
+                <span v-if="session.block">(Blocked)</span>
             </b>
             <div class="dropdown float-right mr-3">
                 <a id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -13,10 +13,11 @@
                     <a href="" class="dropdown-item" @click.prevent="close">
                         Close
                     </a>
-                    <a class="dropdown-item" href="#" @click.prevent="block">
-                        <span v-if="session_block">UnBlock</span>
-                        <span v-else>Block</span>
-
+                    <a class="dropdown-item" href="#" v-if="session.block && can" @click.prevent="unblock">
+                        UnBlock
+                    </a>
+                    <a class="dropdown-item" href="#" v-if="!session.block" @click.prevent="block">
+                        Block
                     </a>
                     <a class="dropdown-item" href="#" @click.prevent="clear">Clear Chat</a>
                 </div>
@@ -36,7 +37,7 @@
         <form class="card-footer" @submit.prevent="send">
             <div class="form-group">
                 <input type="text" class="form-control" placeholder="Write your message here"
-                       :disabled="session_block" v-model="message">
+                       :disabled="session.block" v-model="message">
             </div>
         </form>
     </div>
@@ -49,9 +50,17 @@
             return {
                 chats: [],
                 message: '',
-                session_block: false
             };
         },
+       computed: {
+            // сокращение для краткого обращения к сессии
+            session() {
+               return this.friend.session;
+           },
+           can() {
+                return this.session.blocked_by === authId;
+           }
+       },
         methods: {
             send() {
                 if (this.message) {
@@ -85,7 +94,16 @@
                     .then(res => (this.chats = []));
             },
             block() {
-                this.session_block = !this.session_block
+                this.session.block = true;
+                axios
+                    .post(`/chats/${this.friend.session.id}/block`)
+                    .then(res => (this.session.blocked_by = authId));
+            },
+            unblock() {
+                this.session.block = false;
+                axios
+                    .post(`/chats/${this.friend.session.id}/unblock`)
+                    .then(res => (this.session.blocked_by = null));
             },
             getAllMessages() {
                 axios
@@ -128,7 +146,11 @@
                             chat.read_at = e.chat.read_at
                         }
                     })
-                });
+                })
+                // событие - блокировка пользователя
+                .listen('BlockEvent', (e) => {
+                    this.session.block = e.blocked;
+                })
         }
     };
 </script>

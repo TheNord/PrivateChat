@@ -1957,14 +1957,23 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["friend"],
   data: function data() {
     return {
       chats: [],
-      message: '',
-      session_block: false
+      message: ''
     };
+  },
+  computed: {
+    // сокращение для краткого обращения к сессии
+    session: function session() {
+      return this.friend.session;
+    },
+    can: function can() {
+      return this.session.blocked_by === authId;
+    }
   },
   methods: {
     send: function send() {
@@ -2001,13 +2010,26 @@ __webpack_require__.r(__webpack_exports__);
       });
     },
     block: function block() {
-      this.session_block = !this.session_block;
-    },
-    getAllMessages: function getAllMessages() {
       var _this3 = this;
 
+      this.session.block = true;
+      axios.post("/chats/".concat(this.friend.session.id, "/block")).then(function (res) {
+        return _this3.session.blocked_by = authId;
+      });
+    },
+    unblock: function unblock() {
+      var _this4 = this;
+
+      this.session.block = false;
+      axios.post("/chats/".concat(this.friend.session.id, "/unblock")).then(function (res) {
+        return _this4.session.blocked_by = null;
+      });
+    },
+    getAllMessages: function getAllMessages() {
+      var _this5 = this;
+
       axios.post("/chats/".concat(this.friend.session.id)).then(function (response) {
-        return _this3.chats = response.data.data;
+        return _this5.chats = response.data.data;
       });
     },
     read: function read() {
@@ -2020,7 +2042,7 @@ __webpack_require__.r(__webpack_exports__);
     }
   },
   created: function created() {
-    var _this4 = this;
+    var _this6 = this;
 
     this.getAllMessages();
     this.read(); // слушаем приватный канал сессии на получение событий
@@ -2028,9 +2050,9 @@ __webpack_require__.r(__webpack_exports__);
     Echo.private("Chat.".concat(this.friend.session.id)) // событие - получение нового сообщения
     .listen('PrivateChatEvent', function (e) {
       // помечаем сообщение прочитанным
-      _this4.friend.session.open ? _this4.read() : ''; // добавляем сообщение в список сообщений
+      _this6.friend.session.open ? _this6.read() : ''; // добавляем сообщение в список сообщений
 
-      _this4.chats.push({
+      _this6.chats.push({
         message: e.content,
         type: 1,
         send_at: '1 second ago'
@@ -2038,13 +2060,16 @@ __webpack_require__.r(__webpack_exports__);
     }) // событие - прочтение сообщения
     .listen('MsgReadEvent', function (e) {
       // проходим циклом по всем сообщениям текущей сессии
-      _this4.chats.forEach(function (chat) {
+      _this6.chats.forEach(function (chat) {
         // находим нужное сообщение по ид
         if (chat.id === e.chat.id) {
           // помечаем прочитанным
           chat.read_at = e.chat.read_at;
         }
       });
+    }) // событие - блокировка пользователя
+    .listen('BlockEvent', function (e) {
+      _this6.session.block = e.blocked;
     });
   }
 });
@@ -47818,9 +47843,9 @@ var render = function() {
   var _c = _vm._self._c || _h
   return _c("div", { staticClass: "card card-default chat-box" }, [
     _c("div", { staticClass: "card-header" }, [
-      _c("b", { class: { "text-danger": _vm.session_block } }, [
+      _c("b", { class: { "text-danger": _vm.session.block } }, [
         _vm._v("\n            " + _vm._s(_vm.friend.name) + "\n            "),
-        _vm.session_block ? _c("span", [_vm._v("(Blocked)")]) : _vm._e()
+        _vm.session.block ? _c("span", [_vm._v("(Blocked)")]) : _vm._e()
       ]),
       _vm._v(" "),
       _c("div", { staticClass: "dropdown float-right mr-3" }, [
@@ -47848,24 +47873,39 @@ var render = function() {
               [_vm._v("\n                    Close\n                ")]
             ),
             _vm._v(" "),
-            _c(
-              "a",
-              {
-                staticClass: "dropdown-item",
-                attrs: { href: "#" },
-                on: {
-                  click: function($event) {
-                    $event.preventDefault()
-                    return _vm.block($event)
-                  }
-                }
-              },
-              [
-                _vm.session_block
-                  ? _c("span", [_vm._v("UnBlock")])
-                  : _c("span", [_vm._v("Block")])
-              ]
-            ),
+            _vm.session.block && _vm.can
+              ? _c(
+                  "a",
+                  {
+                    staticClass: "dropdown-item",
+                    attrs: { href: "#" },
+                    on: {
+                      click: function($event) {
+                        $event.preventDefault()
+                        return _vm.unblock($event)
+                      }
+                    }
+                  },
+                  [_vm._v("\n                    UnBlock\n                ")]
+                )
+              : _vm._e(),
+            _vm._v(" "),
+            !_vm.session.block
+              ? _c(
+                  "a",
+                  {
+                    staticClass: "dropdown-item",
+                    attrs: { href: "#" },
+                    on: {
+                      click: function($event) {
+                        $event.preventDefault()
+                        return _vm.block($event)
+                      }
+                    }
+                  },
+                  [_vm._v("\n                    Block\n                ")]
+                )
+              : _vm._e(),
             _vm._v(" "),
             _c(
               "a",
@@ -47942,7 +47982,7 @@ var render = function() {
             attrs: {
               type: "text",
               placeholder: "Write your message here",
-              disabled: _vm.session_block
+              disabled: _vm.session.block
             },
             domProps: { value: _vm.message },
             on: {
