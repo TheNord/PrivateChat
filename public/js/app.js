@@ -1955,6 +1955,8 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["friend"],
   data: function data() {
@@ -1985,7 +1987,7 @@ __webpack_require__.r(__webpack_exports__);
         message: message,
         type: 0,
         read_at: null,
-        send_at: '1 секунду назад'
+        send_at: '1 second ago'
       });
     },
     close: function close() {
@@ -2027,7 +2029,7 @@ __webpack_require__.r(__webpack_exports__);
       _this3.chats.push({
         message: e.content,
         type: 1,
-        send_at: '1 секунду назад'
+        send_at: '1 second ago'
       });
     }) // событие - прочтение сообщения
     .listen('MsgReadEvent', function (e) {
@@ -47897,7 +47899,14 @@ var render = function() {
               "not-read": _vm.readStatus(chat)
             }
           },
-          [_vm._v("\n            " + _vm._s(chat.message) + "\n        ")]
+          [
+            _vm._v("\n            " + _vm._s(chat.message) + "\n            "),
+            _c("br"),
+            _vm._v(" "),
+            _c("span", { staticStyle: { "font-size": "8px" } }, [
+              _vm._v(_vm._s(chat.send_at))
+            ])
+          ]
         )
       }),
       0

@@ -28,6 +28,8 @@
                :key="chat.id"
                :class="{ 'text-right' : chat.type === 0, 'not-read' : readStatus(chat) }">
                 {{ chat.message }}
+                <br>
+                <span style="font-size:8px">{{ chat.send_at }}</span>
             </p>
 
         </div>
@@ -71,7 +73,7 @@
                     message: message,
                     type: 0,
                     read_at: null,
-                    send_at: '1 секунду назад'
+                    send_at: '1 second ago'
                 });
             },
             close() {
@@ -111,7 +113,7 @@
                     this.chats.push({
                         message: e.content,
                         type: 1,
-                        send_at: '1 секунду назад'
+                        send_at: '1 second ago'
                     });
                 })
                 // событие - прочтение сообщения
