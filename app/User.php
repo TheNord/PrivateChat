@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Models\Session;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -16,7 +17,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password',
+        'name', 'email', 'password', 'blocked',
     ];
 
     /**
@@ -27,4 +28,21 @@ class User extends Authenticatable
     protected $hidden = [
         'password', 'remember_token',
     ];
+
+    public function block()
+    {
+        $this->blocked = true;
+        $this->save();
+    }
+
+    public function unblock()
+    {
+        $this->blocked = false;
+        $this->save();
+    }
+
+    public function isBlocked()
+    {
+        return $this->blocked;
+    }
 }

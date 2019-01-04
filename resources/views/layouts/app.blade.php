@@ -82,6 +82,7 @@
         </nav>
 
         <main class="py-4 container">
+            @include('layouts.partials.flash')
             @yield('content')
         </main>
     </div>

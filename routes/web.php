@@ -36,4 +36,10 @@ Route::group(
         Route::post('/chats/{session}/unblock', 'ChatsController@unblock')->name('chats.unblock');
         Route::post('/chats/{session}/clear', 'ChatsController@clear')->name('chats.clear');
         Route::delete('/chats/{session}/destroy', 'ChatsController@destroy')->name('chats.destroy');
+
+        Route::get('/users', 'UsersController@index')->name('users.index');
+        Route::get('/users/{user}', 'UsersController@show')->name('users.show');
+        Route::post('/users/{user}/block', 'UsersController@block')->name('users.block');
+        Route::post('/users/{user}/unblock', 'UsersController@unblock')->name('users.unblock');
+        Route::delete('/users/{user}/destroy', 'UsersController@destroy')->name('users.destroy');
     });
