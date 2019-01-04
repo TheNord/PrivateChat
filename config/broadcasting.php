@@ -35,10 +35,19 @@ return [
             'key' => env('PUSHER_APP_KEY'),
             'secret' => env('PUSHER_APP_SECRET'),
             'app_id' => env('PUSHER_APP_ID'),
+            // Версия для beyondcode
             'options' => [
                 'cluster' => env('PUSHER_APP_CLUSTER'),
-                'encrypted' => false,
+                'encrypted' => true,
+                'host' => '127.0.0.1',
+                'port' => 6001,
+                'scheme' => 'http'
             ],
+//            Версия для Pusher
+//            'options' => [
+//                'cluster' => env('PUSHER_APP_CLUSTER'),
+//                'encrypted' => false,
+//            ],
         ],
 
         'redis' => [

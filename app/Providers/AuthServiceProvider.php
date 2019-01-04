@@ -25,6 +25,12 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-        //
+        // закрытие доступа к статистике вебсокетов (/laravel-websockets)
+        // пока нет ролей хардкодим адрес почты
+        Gate::define('viewWebSocketsDashboard', function ($user) {
+            return in_array($user->email, [
+                'test@mail.ru'
+            ]);
+        });
     }
 }

@@ -10,12 +10,14 @@
     <title>{{ config('app.name', 'Laravel') }}</title>
 
     <!-- Scripts -->
+    @auth
     <script>
         window.user = {!! json_encode([
-        'id' => auth()->user(),
+        'id' => auth()->id(),
         'name' => auth()->user()->name
         ]) !!}
     </script>
+    @endauth
     <script src="{{ asset('js/app.js') }}" defer></script>
 
     <!-- Fonts -->

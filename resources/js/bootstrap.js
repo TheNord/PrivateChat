@@ -48,9 +48,11 @@ import Echo from 'laravel-echo'
 
 window.Pusher = require('pusher-js');
 
+// Версия для beyondcode
 window.Echo = new Echo({
     broadcaster: 'pusher',
-    key: 'bab7513702ac035f67cb',
-    cluster: 'eu',
-    encrypted: false
+    key: process.env.MIX_PUSHER_APP_KEY,
+    wsHost: window.location.hostname,
+    wsPort: 6001,
+    disableStats: true,
 });
