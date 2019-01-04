@@ -1958,12 +1958,14 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["friend"],
   data: function data() {
     return {
       chats: [],
-      message: ''
+      message: '',
+      isTyping: false
     };
   },
   computed: {
@@ -1972,7 +1974,14 @@ __webpack_require__.r(__webpack_exports__);
       return this.friend.session;
     },
     can: function can() {
-      return this.session.blocked_by === authId;
+      return this.session.blocked_by === user.id;
+    }
+  },
+  watch: {
+    message: function message(value) {
+      Echo.private("Chat.".concat(this.friend.session.id)).whisper('typing', {
+        name: user.name
+      });
     }
   },
   methods: {
@@ -2014,7 +2023,7 @@ __webpack_require__.r(__webpack_exports__);
 
       this.session.block = true;
       axios.post("/chats/".concat(this.friend.session.id, "/block")).then(function (res) {
-        return _this3.session.blocked_by = authId;
+        return _this3.session.blocked_by = user.id;
       });
     },
     unblock: function unblock() {
@@ -2070,6 +2079,12 @@ __webpack_require__.r(__webpack_exports__);
     }) // событие - блокировка пользователя
     .listen('BlockEvent', function (e) {
       _this6.session.block = e.blocked;
+    }) // событие - пользователь печатает сообщение
+    .listenForWhisper('typing', function (e) {
+      _this6.isTyping = true;
+      setTimeout(function () {
+        _this6.isTyping = false;
+      }, 3000);
     });
   }
 });
@@ -47845,6 +47860,8 @@ var render = function() {
     _c("div", { staticClass: "card-header" }, [
       _c("b", { class: { "text-danger": _vm.session.block } }, [
         _vm._v("\n            " + _vm._s(_vm.friend.name) + "\n            "),
+        _vm.isTyping ? _c("span", [_vm._v("typing...")]) : _vm._e(),
+        _vm._v(" "),
         _vm.session.block ? _c("span", [_vm._v("(Blocked)")]) : _vm._e()
       ]),
       _vm._v(" "),
@@ -59378,15 +59395,14 @@ window.Echo = new laravel_echo__WEBPACK_IMPORTED_MODULE_0__["default"]({
 /*!***************************************************!*\
   !*** ./resources/js/components/ChatComponent.vue ***!
   \***************************************************/
-/*! no static exports found */
+/*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _ChatComponent_vue_vue_type_template_id_80d584ac___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./ChatComponent.vue?vue&type=template&id=80d584ac& */ "./resources/js/components/ChatComponent.vue?vue&type=template&id=80d584ac&");
 /* harmony import */ var _ChatComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./ChatComponent.vue?vue&type=script&lang=js& */ "./resources/js/components/ChatComponent.vue?vue&type=script&lang=js&");
-/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _ChatComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _ChatComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__[key]; }) }(__WEBPACK_IMPORT_KEY__));
-/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
 
 
 
@@ -59416,7 +59432,7 @@ component.options.__file = "resources/js/components/ChatComponent.vue"
 /*!****************************************************************************!*\
   !*** ./resources/js/components/ChatComponent.vue?vue&type=script&lang=js& ***!
   \****************************************************************************/
-/*! no static exports found */
+/*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";

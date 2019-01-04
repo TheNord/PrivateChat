@@ -11,7 +11,10 @@
 
     <!-- Scripts -->
     <script>
-        window.authId = {!! auth()->id() !!}
+        window.user = {!! json_encode([
+        'id' => auth()->user(),
+        'name' => auth()->user()->name
+        ]) !!}
     </script>
     <script src="{{ asset('js/app.js') }}" defer></script>
 

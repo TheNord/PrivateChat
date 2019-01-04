@@ -3,6 +3,7 @@
         <div class="card-header">
             <b :class="{'text-danger':session.block}">
                 {{ friend.name }}
+                <span v-if="isTyping">typing...</span>
                 <span v-if="session.block">(Blocked)</span>
             </b>
             <div class="dropdown float-right mr-3">
@@ -50,17 +51,26 @@
             return {
                 chats: [],
                 message: '',
+                isTyping: false
             };
         },
-       computed: {
+        computed: {
             // сокращение для краткого обращения к сессии
             session() {
-               return this.friend.session;
-           },
-           can() {
-                return this.session.blocked_by === authId;
-           }
-       },
+                return this.friend.session;
+            },
+            can() {
+                return this.session.blocked_by === user.id;
+            }
+        },
+        watch: {
+            message(value) {
+                Echo.private(`Chat.${this.friend.session.id}`)
+                    .whisper('typing', {
+                        name: user.name
+                    })
+            }
+        },
         methods: {
             send() {
                 if (this.message) {
@@ -97,7 +107,7 @@
                 this.session.block = true;
                 axios
                     .post(`/chats/${this.friend.session.id}/block`)
-                    .then(res => (this.session.blocked_by = authId));
+                    .then(res => (this.session.blocked_by = user.id));
             },
             unblock() {
                 this.session.block = false;
@@ -151,6 +161,13 @@
                 .listen('BlockEvent', (e) => {
                     this.session.block = e.blocked;
                 })
+                // событие - пользователь печатает сообщение
+                .listenForWhisper('typing', e => {
+                    this.isTyping = true;
+                    setTimeout(() => {
+                        this.isTyping = false;
+                    }, 3000);
+                });
         }
     };
 </script>
