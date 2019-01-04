@@ -2,11 +2,31 @@
 
 namespace App\Models;
 
+use App\User;
 use Illuminate\Database\Eloquent\Model;
 
 class Session extends Model
 {
     protected $fillable = ['user1_id', 'user2_id', 'block', 'blocked_by'];
+
+    public function blockSession()
+    {
+        $this->block = true;
+        $this->blocked_by = auth()->id();
+        $this->save();
+    }
+
+    public function unBlockSession()
+    {
+        $this->block = false;
+        $this->blocked_by = null;
+        $this->save();
+    }
+
+    public function isBlocked()
+    {
+        return $this->block;
+    }
 
     // Через таблицу chats, по полю messages_id, мы можем обратиться к таблице messages
     // и получить нужные сообщения для отображения пользователю
@@ -22,17 +42,18 @@ class Session extends Model
         return $this->hasMany(Message::class);
     }
 
-    public function blockSession()
+    public function chat()
     {
-        $this->block = true;
-        $this->blocked_by = auth()->id();
-        $this->save();
+        return $this->hasMany(Chat::class);
     }
 
-    public function unBlockSession()
+    public function user_first()
     {
-        $this->block = false;
-        $this->blocked_by = null;
-        $this->save();
+        return $this->hasOne(User::class, 'id', 'user1_id');
+    }
+
+    public function user_second()
+    {
+        return $this->hasOne(User::class, 'id', 'user2_id');
     }
 }
